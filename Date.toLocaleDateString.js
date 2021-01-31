@@ -1,41 +1,51 @@
 //Date.toLocaleDateString.js
-(function(global){
-	"use strict";
-	
-	var dateFormatOverride = function(locale){
+(function(global) {
+  "use strict";
 
-		var formatGB = this.getDate() + "/" + (this.getMonth() + 1) + "/" + this.getFullYear();
-		var formatUS = this.getMonth() + 1 + "/" + this.getDate() + "/" + this.getFullYear();
-		
-		var formattedDate = {
-			"en-AU": formatGB,
-			"en-CA": formatUS,
-			"en-GB": formatGB,
-			"en-IN": formatUS,
-			"en-NZ": formatGB,
-			"en-US": formatUS,
-			"es-MX": formatGB,
-		};
+  var dateFormatOverride = function(locale) {
+    var formatUS =
+      this.getMonth() + 1 + "/" + this.getDate() + "/" + this.getFullYear();
+    var formatTH =
+      this.getDate() +
+      "/" +
+      this.getMonth() +
+      1 +
+      "/" +
+      this.getFullYear() +
+      543;
 
-		return formattedDate[locale] || formattedDate['en-US'];
-	};
+    var formattedDate = {
+      "en-US": formatUS,
+      "th-TH": formatTH
+    };
 
-	function toLocaleDateStringSupportsLocales() {
-	    try {
-	        new Date().toLocaleDateString("i");
-	    } catch (e) {
-	    	return e.name === "RangeError";
-	    }
-	    return false;
-	}
-	
-	if(!toLocaleDateStringSupportsLocales()){
-		Date.prototype.toLocaleDateString = dateFormatOverride;
-	}
+    return formattedDate[locale] || formattedDate["en-US"];
+  };
 
-	Date.prototype.subtractDays = function(days){
-		return new Date(this.getFullYear(), this.getMonth(), this.getDate() - days);
-	}
-	
-	global.dateFormatOverride = dateFormatOverride;
-}(window));
+  function toLocaleDateStringSupportsLocales() {
+    try {
+      new Date().toLocaleDateString("i");
+      const testDate = new Date(2021, 0, 17, 20, 16, 51);
+      const str = testDate.toLocaleString("th-TH");
+      if (str.indexOf("256") == 5) {
+        throw RangeError("toLocaleDateString is not supported");
+      }
+    } catch (e) {
+      return e.name === "RangeError";
+    }
+    return false;
+  }
+
+  if (!toLocaleDateStringSupportsLocales()) {
+    Date.prototype.toLocaleDateString = dateFormatOverride;
+  }
+
+  global.toLocaleDateStringSupportsLocales = toLocaleDateStringSupportsLocales();
+  global.testDate = () => {
+    const testDate = new Date(2021, 0, 17, 20, 16, 51);
+    return {
+      th: testDate.toLocaleString("th-TH"),
+      en: testDate.toLocaleString("en-US"),
+    }
+  }
+})(window);
